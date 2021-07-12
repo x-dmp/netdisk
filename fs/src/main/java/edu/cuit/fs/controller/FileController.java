@@ -2,6 +2,7 @@ package edu.cuit.fs.controller;
 
 import com.google.gson.Gson;
 import edu.cuit.fs.domain.data;
+import edu.cuit.fs.utils.DbUtil;
 import edu.cuit.fs.utils.FileSystemUtil;
 import edu.cuit.fs.utils.fileUtil;
 import edu.cuit.fs.utils.userFiles;
@@ -32,8 +33,9 @@ public class FileController {
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST, produces = "multipart/form-data")
     @ResponseBody
-    public String uploadFile(@RequestParam MultipartFile file, @RequestParam String username, @RequestParam String hash, @RequestParam String location) throws URISyntaxException, IOException, InterruptedException, FileUploadException {
+    public String uploadFile(@RequestParam MultipartFile file, @RequestParam String username, @RequestParam String filename, @RequestParam String hash, @RequestParam String location) throws URISyntaxException, IOException, InterruptedException, FileUploadException {
         data res = new data();
+        System.out.println(username + "\n" + hash  + "\n" + location + "\n" + filename);
         fileUtil FU = new fileUtil();
         try {
             res.data.add(file.getOriginalFilename());
@@ -45,20 +47,18 @@ public class FileController {
                 res.description = "文件校验失败，检测网络环境后请重新上传";
                 return gson.toJson(res);
             }
-            System.out.println(location);
             FileSystemUtil fileSystemUtil = new FileSystemUtil();
-            FileSystemUtil.init();
             String path = FU.getPath(hash);
             FSDataOutputStream fos = (FSDataOutputStream) fileSystemUtil.getOutputStream(path);
             fos.write(bytes, 0, bytes.length);
+            userFiles usf = new userFiles(username);
+            usf.init().insertFiles(false, filename, location, hash).saveFileInfo();
             res.code = 0;
             res.description = "文件上传成功！";
         } catch (Exception e) {
             e.printStackTrace();
             res.code = -2;
-            res.description = "有人拔掉了服务器的网线";
-        } finally {
-            FileSystemUtil.close();
+            res.description = "有人炸掉了服务器";
         }
         return gson.toJson(res);
     }
@@ -74,8 +74,8 @@ public class FileController {
         try {
             fileUtil fu = new fileUtil();
             FileSystemUtil FU = new FileSystemUtil();
-            FileSystemUtil.init();
             String src = fu.getPath(hash);
+            src = "/user" + src;
             System.out.println(src);
             in = FU.getData(src);
             out = response.getOutputStream();
@@ -87,8 +87,7 @@ public class FileController {
         } catch (Exception e) {
             throw e;
         } finally {
-            FileSystemUtil.close();
-            if (out != null)out.close();
+            if (out != null) out.close();
         }
     }
 }

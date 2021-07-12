@@ -1,6 +1,7 @@
 package edu.cuit.fs.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import edu.cuit.fs.domain.file;
 
 import java.io.IOException;
@@ -38,20 +39,36 @@ public class userFiles {
         return this;
     }
 
+    private List<file> getFilesInfo(String location){
+        List<file> fs = files;
+        String[] locations = location.split("_");
+        System.out.println(files);
+        System.out.println(locations);
+        for (int i = 0; i < locations.length-1; i++){
+            fs = fs.get(i).getList();
+        }
+        return fs;
+    }
+
     private List<file> getFs(String location){
         List<file> fs = files;
         if (location.equals("")){
             return files;
         }
-        String[] strings = location.split("_");
+        String[] S = location.split("_");
+        List<String> strings = new LinkedList<>();
+        for (int i = 0; i < S.length-1; i++){
+            strings.add(S[i]);
+        }
         int i = 0;
-        String loc = strings[i++];
+        String loc = strings.get(i);
+        i++;
         while (true){
             int f = 0;
             for (file l : fs){
                 if (loc.equals(l.getLocation())){
                     fs = l.getList();
-                    if (i < strings.length) loc  = loc + "_" + strings[i++];
+                    if (i < strings.size()) loc  = loc + "_" + strings.get(i++);
                     if (loc == location){
                         return fs;
                     }
@@ -76,27 +93,23 @@ public class userFiles {
     }
 
     public userFiles init(){
-        DbUtil.init();
         String json = null;
         try {
             json = DbUtil.getData("userinfo", this.ID, "file", "files");
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
-            DbUtil.close();
         }
-        files = gson.fromJson(json, List.class);
+        files = gson.fromJson(json, new TypeToken<List<file>>() {}.getType());
         return this;
     }
 
     public void saveFileInfo(){
-        DbUtil.init();
         try {
             DbUtil.insertData("userinfo", this.ID, "file", "files", toString());
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
-            DbUtil.close();
         }
     }
 

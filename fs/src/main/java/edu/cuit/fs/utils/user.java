@@ -50,48 +50,39 @@ public class user {
     }
 
     public boolean isPwdTrue(){
-        DbUtil.init();
         try {
             String data = DbUtil.getData("userinfo", this.id, "user", "password");
             if (data == null || data.equals("")) {
-                DbUtil.close();
                 return false;
             }
             if (data.equals(this.password)){
-                DbUtil.close();
                 return true;
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DbUtil.close();
         }
         return false;
     }
 
     public boolean saveUser() {
-        DbUtil.init();
         try {
             DbUtil.insertData("userinfo", this.id, "user", "username", this.username);
             DbUtil.insertData("userinfo", this.id, "user", "password", this.password);
-            DbUtil.close();
             return true;
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            DbUtil.close();
         }
         return false;
     }
 
     public void save(String col, String id,  String data){
-        DbUtil.init();
         try {
             DbUtil.insertData("userinfo", id, "user", col, data);
         } catch (IOException e) {
             e.printStackTrace();
         }finally {
-            DbUtil.close();
         }
     }
 
@@ -114,7 +105,6 @@ public class user {
     }
 
     private boolean idIsUsed(String ID) {
-        DbUtil.init();
         try {
             String data = DbUtil.getData("userinfo", ID, "user", "username");
             if (data != null || data != "") {
@@ -123,7 +113,6 @@ public class user {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            DbUtil.close();
         }
         return false;
     }

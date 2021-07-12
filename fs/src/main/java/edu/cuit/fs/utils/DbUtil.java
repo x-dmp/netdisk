@@ -19,6 +19,7 @@ public class DbUtil {
     public static Connection connection = null;
     public static Admin admin = null;
 
+
     public static String getData(String tableName, String rowKey, String colFamily, String col) throws IOException {
         Table table = connection.getTable(TableName.valueOf(tableName));
         Get get = new Get(rowKey.getBytes());
